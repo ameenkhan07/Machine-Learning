@@ -1,9 +1,9 @@
 """Module containing functions to process the data before and after
 feeding into neural network
 """
-
-from keras.utils import np_utils
 import numpy as np
+from keras.utils import np_utils
+
 import os
 
 # Silence TF Warnings
