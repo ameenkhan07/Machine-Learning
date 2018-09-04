@@ -12,16 +12,15 @@ class FizzBuzz():
         :type n: int
         :rtype: str
         """
-        if not n: return None
-
-        if not n % 5 and not n % 3:
-            return ('FizzBuzz')
-        elif not n % 3:
-            return ('Fizz')
-        elif not n % 5:
-            return ('Buzz')
+        # Logic Explanation
+        if n % 3 == 0 and n % 5 == 0:
+            return 'fizzbuzz'
+        elif n % 3 == 0:
+            return 'fizz'
+        elif n % 5 == 0:
+            return 'buzz'
         else:
-            return str(n)
+            return 'other'
 
 
 class TestFizzBuzz(unittest.TestCase):
