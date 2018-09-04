@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# Jupyter Logs
+logs/
+
 # Distribution / packaging
 .Python
 build/
