@@ -6,6 +6,12 @@ from sequential_neural_network import (
     test_model
 )
 
+print('-------------------')
+print('UBitName = ameenmoh')
+print('personNumber = 50288968')
+print('-------------------')
+
+
 TRAINING_DATA = "./data/training.csv"
 TESTING_DATA = "./data/testing.csv"
 
