@@ -8,70 +8,91 @@ from keras.layers import Dense, Activation, Dropout
 from keras.callbacks import EarlyStopping, TensorBoard
 import pandas as pd
 
-from process_dataset import (
-    processData, 
-    encodeData, 
-    encodeLabel, 
-    decodeLabel
-)
+from process_dataset import (processData, encodeData, encodeLabel, decodeLabel)
 
 # MODEL PARAMETERS
-input_size = 10  # 2^10 >1000
-drop_out = 0.2  # adjusting for overfitting
-first_dense_layer_nodes = 256  # first trainng layer, (hidden layer), hyperparameter
-# if hidden layer shouldnt be too absurt, not to large (overfitting)
-# not to small
-second_dense_layer_nodes = 4  # output layer
+input_size = 10 # 2^10 > 1000
+drop_out = 0.2 # adjusting for overfitting
+
+first_dense_layer_nodes  = 256 # first hidden layer
+# Note : hidden layer shouldn't be too absurd,
+# not to large (overfitting), not to small
+second_dense_layer_nodes = 4 # output layer
+
 
 
 def get_model():
-    """
+    """Returns Sequential NN model
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+        model: keras Sequential object
     """
 
     # Why do we need a model?
+    # 'Model' is a data structure used by keras, a way to
+    # organize the layers.
+
     # Why use Dense layer and then activation?
+    # Dense layer means fully connected layer.
+
     # Why use sequential model with layers?
     model = Sequential()
-    # input matrix dimensionality 900*10
-    # reason : 900 input number, 10 bits of each numbers
 
-    # weight of first hidden layer = 10*256
-    # dimentionality of output will be 900*256
-
-    # output matrix to activation function : sigmoid, relu etc
-    # relu is also used in regularization
-    # why not sigmoid?
-    # variants fo relu, max(x, 0)
-
+    # First Hidden Layer
+    # Input dimensionality 900*10
+    # reason : 900 numbers (101-1000), 10 bits each
+    # Weight of first hidden layer = 10 * 256 (10 bits, 256 units in the first layer)
+    # Dimensions from first layer = 900 * 256
     model.add(Dense(first_dense_layer_nodes, input_dim=input_size))
+
+    #  # Activation Layer
+    # Activation : Fucntions sigmoid/ relu
+    # Why Relu :relu is also used in regularization
+    # Why not sigmoid?
     model.add(Activation('relu'))
 
     # Why dropout?
+    # Dropout is a technique where randomly selected neurons are ignored during training.
+    # The effect is that the network becomes less sensitive to the specific weights of neurons.
+    # This in turn results in a network that is capable of better generalization and is less likely to
+    # overfit the training data.
     model.add(Dropout(drop_out))
 
+    # Second Layer, Output Layer
     model.add(Dense(second_dense_layer_nodes))
     model.add(Activation('softmax'))
     # Why Softmax?
 
     model.summary()
 
-    # SGD? optimizers
-    #     Optimizers:
-    # adagrad, adam etc.
+    # Experiment with optimizers:
+    # SGD, adagrad, adam etc.
+
 
     # Loss function
     # Cross Entropy: KL Divergence
     # Why use categorical_crossentropy?
-    model.compile(
-        optimizer='rmsprop',
-        loss='categorical_crossentropy',
-        metrics=['accuracy'])
+    model.compile(optimizer='rmsprop',
+                  loss='categorical_crossentropy',
+                  metrics=['accuracy'])
 
     return model
 
 
 def run_model(model):
-    """
+    """Executes the model
+
+    Parameters
+    ----------
+        model: keras sequential.Sequential object
+
+    Returns
+    -------
+        history: keras callbacks.History object
     """
     validation_data_split = 0.2  # trying to tackle the problem of overfitting
     # difference between validation to testing
@@ -106,11 +127,18 @@ def run_model(model):
         epochs=num_epochs,
         batch_size=model_batch_size,
         callbacks=[tensorboard_cb, earlystopping_cb])
+
+
     return history
 
 
 def test_model(model):
-    """
+    """Tests the accuracy of the model and outputs the result data
+    into a pdf
+
+    Parameters
+    ----------
+        model: keras sequential.Sequential object
     """
     wrong = 0
     right = 0
