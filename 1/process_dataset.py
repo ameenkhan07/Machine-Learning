@@ -6,7 +6,11 @@ from keras.utils import np_utils
 
 import os
 
-# Silence TF Warnings
+# TF_CPP_MIN_LOG_LEVEL : Tensorflow environment variable
+# Default: to 0 (all logs shown), 
+# 1 to filter out INFO logs, 
+# 2 to additionally filter out WARNING logs, 
+# 3 to additionally filter out ERROR logs
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
@@ -14,14 +18,14 @@ def processData(dataset):
     """Processes input data and label.
     
     Parameters
-    ---------
+    ----------
         dataset : pandas dataframe
             Dataframe containing data and labels
 
     Returns
     -------
-        processedData : list
-        processedLabel :  list
+        processedData : numpy.ndarray
+        processedLabel :  numpy.ndarray
     """
 
     # Why do we have to process?
@@ -39,16 +43,15 @@ def encodeData(data):
     
     Parameters
     ----------
-        data : list[int]
+        data : numpy.ndarray
 
     Returns
     -------
-        processedData : numpy array
+        processedData : numpy.ndarray
     """
     processedData = []
 
     for dataInstance in data:
-
         # Why do we have number 10?
         processedData.append([dataInstance >> d & 1 for d in range(10)])
 
@@ -60,12 +63,13 @@ def encodeLabel(labels):
 
     Parameters
     ----------
-        data : list[str]
+        labels : numpy.ndarray
 
     Returns
     -------
-        processedLabel : numpy array
+        processedLabel : numpy.ndarray
     """
+
     processedLabel = []
 
     for labelInstance in labels:
