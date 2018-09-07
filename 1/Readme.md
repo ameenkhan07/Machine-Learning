@@ -2,12 +2,15 @@
 ### Setup
 
 ```{sh}
-# Setup virtualenv
-virtualenv --system-site-packages -p python3 env
-source venv/bin/activate
+# Setup venv
+python3 -m venv virtualenv
+source virtualenv/bin/activate
 
 # Install all libraries
-pip3 install jupyter --user
+pip install jupyter --user
+pip install jupyterthemes
+jt -t grade3 -fs 95 -altp -tfs 11 -nfs 115 -cellw 88% -T
+
 pip3 install --upgrade tensorflow
 pip3 install keras
 pip3 install matplotlib
