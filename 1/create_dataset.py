@@ -1,6 +1,6 @@
 """Module containing functions for creating training and testing data"""
 
-import pandas as pd
+from utils import save_data
 from FizzBuzz import FizzBuzz
 
 def createInputCSV(start, end, filename):
@@ -33,7 +33,6 @@ def createInputCSV(start, end, filename):
     dataset["input"] = inputData
     dataset["label"] = outputData
 
-    # Writing to csv
-    pd.DataFrame(dataset).to_csv(filename)
+    save_data(dataset, filename)
 
     print(filename, "Created!")

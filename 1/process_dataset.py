@@ -19,7 +19,7 @@ def processData(dataset):
     
     Parameters
     ----------
-        dataset : pandas dataframe
+        dataset : pandas.Dataframe
             Dataframe containing data and labels
 
     Returns

@@ -6,19 +6,18 @@ import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense, Activation, Dropout
 from keras.callbacks import EarlyStopping, TensorBoard
-import pandas as pd
+from utils import get_data, save_data
 
 from process_dataset import (processData, encodeData, encodeLabel, decodeLabel)
 
 # MODEL PARAMETERS
-input_size = 10 # 2^10 > 1000
-drop_out = 0.2 # adjusting for overfitting
+input_size = 10  # 2^10 > 1000
+drop_out = 0.2  # adjusting for overfitting
 
-first_dense_layer_nodes  = 256 # first hidden layer
+first_dense_layer_nodes = 256  # first hidden layer
 # Note : hidden layer shouldn't be too absurd,
 # not to large (overfitting), not to small
-second_dense_layer_nodes = 4 # output layer
-
+second_dense_layer_nodes = 4  # output layer
 
 
 def get_model():
@@ -72,13 +71,13 @@ def get_model():
     # Experiment with optimizers:
     # SGD, adagrad, adam etc.
 
-
     # Loss function
     # Cross Entropy: KL Divergence
     # Why use categorical_crossentropy?
-    model.compile(optimizer='rmsprop',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    model.compile(
+        optimizer='rmsprop',
+        loss='categorical_crossentropy',
+        metrics=['accuracy'])
 
     return model
 
@@ -116,7 +115,7 @@ def run_model(model):
         monitor='val_loss', verbose=1, patience=early_patience, mode='min')
 
     # Read Dataset
-    dataset = pd.read_csv('training.csv')
+    dataset = get_data('training.csv')
 
     # Process Dataset
     processedData, processedLabel = processData(dataset)
@@ -127,7 +126,6 @@ def run_model(model):
         epochs=num_epochs,
         batch_size=model_batch_size,
         callbacks=[tensorboard_cb, earlystopping_cb])
-
 
     return history
 
@@ -143,10 +141,7 @@ def test_model(model):
     wrong = 0
     right = 0
 
-    TESTING_DATA = "./data/testing.csv"
-    OUTPUT_DATA = "./data/output.csv"
-
-    testData = pd.read_csv(TESTING_DATA)
+    testData = get_data('testing.csv')
 
     processedTestData = encodeData(testData['input'].values)
     processedTestLabel = encodeLabel(testData['label'].values)
@@ -170,5 +165,4 @@ def test_model(model):
     output["label"] = testData['label']
     output["predicted_label"] = predictedTestLabel
 
-    opdf = pd.DataFrame(output)
-    opdf.to_csv(OUTPUT_DATA)
+    save_data(output, 'output.csv', 'outputs')
