@@ -18,8 +18,8 @@
 16,17,other,other
 17,18,fizz,fizz
 18,19,other,other
-19,20,buzz,other
-20,21,fizz,fizz
+19,20,buzz,buzz
+20,21,fizz,other
 21,22,other,other
 22,23,other,other
 23,24,fizz,fizz
@@ -32,7 +32,7 @@
 30,31,other,other
 31,32,other,other
 32,33,fizz,fizz
-33,34,other,fizz
+33,34,other,other
 34,35,buzz,buzz
 35,36,fizz,fizz
 36,37,other,other
@@ -68,7 +68,7 @@
 66,67,other,other
 67,68,other,other
 68,69,fizz,fizz
-69,70,buzz,buzz
+69,70,buzz,other
 70,71,other,other
 71,72,fizz,fizz
 72,73,other,other
