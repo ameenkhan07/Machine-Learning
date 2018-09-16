@@ -8,20 +8,17 @@ from keras.layers import Dense, Activation, Dropout
 from keras.callbacks import EarlyStopping, TensorBoard
 from utils import get_data, save_data
 
+import tensorflow as tf
+import random as rn
+import os
+os.environ['PYTHONHASHSEED'] = '0'
+
+
 from process_dataset import (processData, encodeData, encodeLabel, decodeLabel)
-
-# MODEL PARAMETERS
-input_size = 10  # 2^10 > 1000
-drop_out = 0.2  # adjusting for overfitting
-
-first_dense_layer_nodes = 256  # first hidden layer
-# Note : hidden layer shouldn't be too absurd,
-# not to large (overfitting), not to small
-second_dense_layer_nodes = 4  # output layer
 
 
 def get_model():
-    """Returns Sequential NN model
+    """Defines and returns Sequential NN model
 
     Parameters
     ----------
@@ -31,26 +28,34 @@ def get_model():
         model: keras Sequential object
     """
 
-    # Why do we need a model?
-    # 'Model' is a data structure used by keras, a way to
-    # organize the layers.
+    ## MODEL PARAMETERS
+    
+    input_size = 10  # 2^10 > 1000
+    first_dense_layer_nodes = 512  # first hidden layer
+    second_dense_layer_nodes = 256  # first hidden layer
+    third_dense_layer_nodes = 4  # output layer, no of classes of classification problem
+    drop_out = 0.3  # Dropout Rate, adjusting for overfitting
 
-    # Why use Dense layer and then activation?
-    # Dense layer means fully connected layer.
-
-    # Why use sequential model with layers?
+    # 'Model' is a data structure used by keras, a way to 
+    # organize(stack) the layers.
+    # Dense in Keras means fully connected layer.
+    # Keras has 2 ways for defining an architecture of neural nodes,
+    # 1. Sequential : linear stack of layers
+    # 2. functional API : for completely arbitrary architecture
+    # for our purpose, approach 1 suffices  
     model = Sequential()
 
-    # First Hidden Layer
-    # Input dimensionality 900*10
-    # reason : 900 numbers (101-1000), 10 bits each
-    # Weight of first hidden layer = 10 * 256 (10 bits, 256 units in the first layer)
-    # Dimensions from first layer = 900 * 256
+    # Input Layer(First Layer): Dimensionality 900*10
+    # 900 numbers (101-1000), 10 bits each
+
+    # Hidden Layer:
+    # Weights: 10 * 256 (10 bits, 256 units in the first layer)
+    # Dimensions from output of first layer = 900 * 256
+    # Note : hidden layer units shouldn't be too absurd (too large or too small)
     model.add(Dense(first_dense_layer_nodes, input_dim=input_size))
 
-    #  # Activation Layer
-    # Activation : Fucntions sigmoid/ relu
-    # Why Relu :relu is also used in regularization
+    # Activation : Functions sigmoid/relu for hidden layers
+    # To bring non linearity
     # Why not sigmoid?
     model.add(Activation('relu'))
 
@@ -61,21 +66,31 @@ def get_model():
     # overfit the training data.
     model.add(Dropout(drop_out))
 
-    # Second Layer, Output Layer
+    # Second Hidden Layer
+    # 256 nodes, ReLU activated with same dropout
     model.add(Dense(second_dense_layer_nodes))
+    model.add(Activation('relu'))
+    model.add(Dropout(drop_out))
+ 
+    # Output Layer
+    model.add(Dense(third_dense_layer_nodes))
     model.add(Activation('softmax'))
     # Why Softmax?
 
+    # Overview of the defined architecture
     model.summary()
 
-    # Experiment with optimizers:
-    # SGD, adagrad, adam etc.
+    
+    ## Network Compilation Step : learning process is configured
+    
+    # Loss function : feedback signal used for learning(updating) the weight tensors
+    # categorical_crossentropy : generally used for many-class classification problem
 
-    # Loss function
-    # Cross Entropy: KL Divergence
-    # Why use categorical_crossentropy?
+    # Optimizer : algorithm to minimize loss function in the training phase.
+    # determines how training proceeds
+
     model.compile(
-        optimizer='rmsprop',
+        optimizer='adadelta',
         loss='categorical_crossentropy',
         metrics=['accuracy'])
 
@@ -92,33 +107,40 @@ def run_model(model):
     Returns
     -------
         history: keras callbacks.History object
+            dict object, containing data about everything that happened
+            during training
+            
     """
-    validation_data_split = 0.2  # trying to tackle the problem of overfitting
-    # difference between validation to testing
-    # after every epoch we validate
-    # validation loss and training loss
-    # validation avoids over fitting
 
-    # cross validation: validation data keeps rotating
+    # Parameters used in Training Phase
 
-    num_epochs = 10000  # experiment on this
+    # Epochs : each iteration over entire data
+    num_epochs = 1000
+
+    # Mini batch size, 
+    # each epoch consists this many samples of data multiple times 
+    # over to complete the entire dataset
     model_batch_size = 128
-    # minibatch? : between the 2 approaches:
-    # fitting whole data into the model,
 
+    # Validation split : data the model has never seen before, used after each 
+    # epoch to validate predicted value calculated during the training phase
+    # To tackle the problem of overfitting
+    validation_data_split = 0.2
+
+    # Tensorboard and Early Stopping : TF callbacks definition
     tb_batch_size = 32
     early_patience = 100
-
     tensorboard_cb = TensorBoard(
         log_dir='logs', batch_size=tb_batch_size, write_graph=True)
     earlystopping_cb = EarlyStopping(
         monitor='val_loss', verbose=1, patience=early_patience, mode='min')
 
-    # Read Dataset
+    # Retrieve training dataset and respective labels
     dataset = get_data('training.csv')
-
-    # Process Dataset
     processedData, processedLabel = processData(dataset)
+
+    # Training Phase
+    
     history = model.fit(
         processedData,
         processedLabel,

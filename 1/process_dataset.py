@@ -39,7 +39,8 @@ def processData(dataset):
 
 
 def encodeData(data):
-    """Returns data converted to its binary reporesentaiton
+    """Returns data converted to its binary reporesentation
+    in order to be able to fed into neural network as tensors.
     
     Parameters
     ----------

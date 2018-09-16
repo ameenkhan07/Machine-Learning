@@ -16,7 +16,7 @@ createInputCSV(1, 101, 'testing.csv')
 # Initialize and run the model
 model = get_model()
 history = run_model(model)
-save_plot(history.history, 'tf.png')
+save_plot(history.history, 'keras.png')
 
 # Test Accuracy
 test_model(model)
