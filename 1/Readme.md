@@ -17,16 +17,28 @@ pip3 install matplotlib
 pip3 install pandas
 ```
 
-### Files
+### Code Files
 
-- data (Directory for storing data being generated)
-    - testing.csv
-    - training.csv
-    - output.csv
+
 - main.py
+- utils.py
 - FizzBuzz.py
 - create_dataset.py
 - process_dataset.py
 - sequential_neural_network.py
 
-- Fizzing and Buzzing.ipynb
+- Fizzing and Buzzing Keras.ipynb
+- Fizzing and Buzzing Tensorflow.ipynb
+
+
+- data (Directory for storing data being generated)
+    - testing.csv
+    - training.csv
+- outputs
+    - keras.png
+    - output.csv
+
+
+### Additional Notes
+
+- Reproducible Results in Keras needed for every set of hyperparameter, details [here](https://keras.io/getting-started/faq/#how-can-i-obtain-reproducible-results-using-keras-during-developmen) 
