@@ -29,6 +29,11 @@ def createInputCSV(start, end, filename):
         outputData.append(FizzBuzz().func(i))
 
     # Why Dataframe?
+    # Dataframes are pandas objects, which themselves are enhanced version of 
+    # numpy structured arrays
+    # DataFrames are inherently multidimensional arrays with 
+    # attached row and column labels, and added support for heterogeneous 
+    # types and missing data.
     dataset = {}
     dataset["input"] = inputData
     dataset["label"] = outputData
