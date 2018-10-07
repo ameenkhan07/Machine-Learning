@@ -4,24 +4,20 @@ import numpy as np
 from prep_data import *
 from linear_regression import *
 
-maxAcc = 0.0
-maxIter = 0
-C_Lambda = 0.03
-TrainingPercent = 80
-ValidationPercent = 10
-TestPercent = 10
-M = 10
-PHI = []
-IsSynthetic = False
+
+# Constants used throughout the prog
+C_Lambda = 5
+TrainingPercent = 80 # Data Split for Training Data
+ValidationPercent = 10 # Data Split for Validation Data
+TestPercent = 10 # Data Split for Testing Data
+M = 100 # Number of Radial Basis Func
+PHI = [] 
 
 
 def get_closed_form_solution(TRAINING_PHI, TEST_PHI, VAL_PHI, TrainingData,
                              TrainingTarget, TestData, ValData):
     """
     """
-    ErmsArr = []
-    AccuracyArr = []
-
     TR_TEST_OUT = GetValTest(TRAINING_PHI, W)
     VAL_TEST_OUT = GetValTest(VAL_PHI, W)
     TEST_OUT = GetValTest(TEST_PHI, W)
@@ -40,10 +36,7 @@ def get_sgd_solution(TRAINING_PHI, TEST_PHI, VAL_PHI, W_Now, TrainingData,
     # Gradient Descent Solution for Linear Regression
     La = 2
     learningRate = 0.01
-    L_Erms_Val = []
-    L_Erms_TR = []
-    L_Erms_Test = []
-    W_Mat = []
+    L_Erms_Val, L_Erms_TR, L_Erms_Test, W_Mat = [], [], [], []
 
     for i in range(0, 400):
 
@@ -79,14 +72,14 @@ if __name__ == "__main__":
 
     # Fetch and Prepare Dataset
     RawTarget = GetTargetVector('./data/Querylevelnorm_t.csv')
-    RawData = GenerateRawData('./data/Querylevelnorm_X.csv', IsSynthetic)
+    RawData = GenerateRawData('./data/Querylevelnorm_X.csv')
 
     # Prepare Training Data
     TrainingTarget = np.array(
         GenerateTrainingTarget(RawTarget, TrainingPercent))
     TrainingData = GenerateTrainingDataMatrix(RawData, TrainingPercent)
-    print(TrainingTarget.shape)
-    print(TrainingData.shape)
+    # print('Training Target : ', TrainingTarget.shape)
+    # print('Training Data : ', TrainingData.shape)
 
     # Prepare Validation Data
     ValDataAct = np.array(
@@ -94,17 +87,8 @@ if __name__ == "__main__":
                                 (len(TrainingTarget))))
     ValData = GenerateValData(RawData, ValidationPercent,
                               (len(TrainingTarget)))
-    print(ValDataAct.shape)
-    print(ValData.shape)
-
-    # Prepare Vaildation Data
-    TestDataAct = np.array(
-        GenerateValTargetVector(RawTarget, TestPercent,
-                                (len(TrainingTarget) + len(ValDataAct))))
-    TestData = GenerateValData(RawData, TestPercent,
-                               (len(TrainingTarget) + len(ValDataAct)))
-    print(ValDataAct.shape)
-    print(ValData.shape)
+    # print(ValDataAct.shape)
+    # print(ValData.shape)
 
     # Prepare Test Data
     TestDataAct = np.array(
@@ -112,31 +96,37 @@ if __name__ == "__main__":
                                 (len(TrainingTarget) + len(ValDataAct))))
     TestData = GenerateValData(RawData, TestPercent,
                                (len(TrainingTarget) + len(ValDataAct)))
-    print(ValDataAct.shape)
-    print(ValData.shape)
+    # print(TestDataAct.shape)
+    # print(TestData.shape)
 
-    # print('UBITname      = ameenmoh')
-    # print('Person Number = 50288968')
-    # print('----------------------------------------------------')
-    # print("------------------LeToR Data------------------------")
-    # print('----------------------------------------------------')
+    print('UBITname      = ameenmoh')
+    print('Person Number = 50288968')
+    print('----------------------------------------------------')
+    print("------------------LeToR Data------------------------")
+    print('----------------------------------------------------')
 
+    # KMeans to get centroids, Mu
     kmeans = KMeans(
         n_clusters=M, random_state=0).fit(np.transpose(TrainingData))
     Mu = kmeans.cluster_centers_
-    BigSigma = GenerateBigSigma(RawData, Mu, TrainingPercent, IsSynthetic)
+
+    # Get the covariance matrix
+    BigSigma = GenerateBigSigma(RawData, Mu, TrainingPercent)
+
+    #
     TRAINING_PHI = GetPhiMatrix(RawData, Mu, BigSigma, TrainingPercent)
-    W = GetWeightsClosedForm(TRAINING_PHI, TrainingTarget, (C_Lambda))
     TEST_PHI = GetPhiMatrix(TestData, Mu, BigSigma, 100)
     VAL_PHI = GetPhiMatrix(ValData, Mu, BigSigma, 100)
+
+    W = GetWeightsClosedForm(TRAINING_PHI, TrainingTarget, (C_Lambda))
     W_Now = np.dot(220, W)
 
-    print(Mu.shape)
-    print(BigSigma.shape)
-    print(TRAINING_PHI.shape)
-    print(W.shape)
-    print(VAL_PHI.shape)
-    print(TEST_PHI.shape)
+    print('Mu Shape : ', Mu.shape)
+    print('Big Sigma Shape : ',BigSigma.shape)
+    print('W Shape : ',W.shape)
+    print('PHI matrix (Training) Shape : ',TRAINING_PHI.shape)
+    print('PHI matrix (Validation) Shape : ',VAL_PHI.shape)
+    print('PHI matrix (Testing) Shape : ',TEST_PHI.shape)
 
     print("-------Closed Form with Radial Basis Function-------")
     print('----------------------------------------------------')

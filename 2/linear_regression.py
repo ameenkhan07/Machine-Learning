@@ -2,8 +2,8 @@ import numpy as np
 import math
 
 
-def GenerateBigSigma(Data, MuMatrix, TrainingPercent, IsSynthetic):
-    """
+def GenerateBigSigma(Data, MuMatrix, TrainingPercent):
+    """Generate and returns the Covariance Matrix
     """
 
     BigSigma = np.zeros((len(Data), len(Data)))
@@ -18,16 +18,13 @@ def GenerateBigSigma(Data, MuMatrix, TrainingPercent, IsSynthetic):
 
     for j in range(len(Data)):
         BigSigma[j][j] = varVect[j]
-    if IsSynthetic == True:
-        BigSigma = np.dot(3, BigSigma)
-    else:
-        BigSigma = np.dot(200, BigSigma)
+    BigSigma = np.dot(200, BigSigma)
     ##print ("BigSigma Generated..")
     return BigSigma
 
 
 def GetScalar(DataRow, MuRow, BigSigInv):
-    """
+    """Utility function for calculating the Radial Basis Function
     """
 
     R = np.subtract(DataRow, MuRow)
@@ -37,28 +34,15 @@ def GetScalar(DataRow, MuRow, BigSigInv):
 
 
 def GetRadialBasisOut(DataRow, MuRow, BigSigInv):
-    """
+    """Returns Gaussian Radial Basis Function
     """
     phi_x = math.exp(-0.5 * GetScalar(DataRow, MuRow, BigSigInv))
     return phi_x
 
 
-def GetPhiMatrix(Data, MuMatrix, BigSigma, TrainingPercent=80):
-    """
-    """
-    DataT = np.transpose(Data)
-    TrainingLen = math.ceil(len(DataT) * (TrainingPercent * 0.01))
-    PHI = np.zeros((int(TrainingLen), len(MuMatrix)))
-    BigSigInv = np.linalg.inv(BigSigma)
-    for C in range(0, len(MuMatrix)):
-        for R in range(0, int(TrainingLen)):
-            PHI[R][C] = GetRadialBasisOut(DataT[R], MuMatrix[C], BigSigInv)
-    #print ("PHI Generated..")
-    return PHI
-
-
 def GetWeightsClosedForm(PHI, T, Lambda):
-    """
+    """Returns closed form solution of sum of squares error with
+    least squared regularization
     """
     Lambda_I = np.identity(len(PHI[0]))
     for i in range(0, len(PHI[0])):
@@ -74,7 +58,8 @@ def GetWeightsClosedForm(PHI, T, Lambda):
 
 
 def GetPhiMatrix(Data, MuMatrix, BigSigma, TrainingPercent=80):
-    """
+    """Computes and returns Moore Penrose pseudo inverse of the matrix,
+    PHI. Desing Matrix
     """
     DataT = np.transpose(Data)
     TrainingLen = math.ceil(len(DataT) * (TrainingPercent * 0.01))
@@ -88,7 +73,11 @@ def GetPhiMatrix(Data, MuMatrix, BigSigma, TrainingPercent=80):
 
 
 def GetValTest(VAL_PHI, W):
-    """
+    """Computes and returns the linear regression function
+    Parameters:
+    -----------
+        VAL_PHI : M Basis Functions
+        W : weight vector
     """
     Y = np.dot(W, np.transpose(VAL_PHI))
     ##print ("Test Out Generated..")
@@ -96,7 +85,7 @@ def GetValTest(VAL_PHI, W):
 
 
 def GetErms(VAL_TEST_OUT, ValDataAct):
-    """
+    """Computes and returns Root Mean Square Error for evaluating the solution
     """
     sum = 0.0
     t = 0
