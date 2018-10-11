@@ -6,11 +6,12 @@ from linear_regression import *
 
 
 # Constants used throughout the prog
-C_Lambda = 5
+learningRate = 1
+C_Lambda = 0.01
 TrainingPercent = 80 # Data Split for Training Data
 ValidationPercent = 10 # Data Split for Validation Data
 TestPercent = 10 # Data Split for Testing Data
-M = 100 # Number of Radial Basis Func
+M = 10 # Number of Radial Basis Func
 PHI = [] 
 
 
@@ -35,12 +36,12 @@ def get_sgd_solution(TRAINING_PHI, TEST_PHI, VAL_PHI, W_Now, TrainingData,
     """
     # Gradient Descent Solution for Linear Regression
     La = 2
-    learningRate = 0.01
-    L_Erms_Val, L_Erms_TR, L_Erms_Test, W_Mat = [], [], [], []
+    # learningRate = 0.01
+    L_Erms_Val, L_Erms_TR, L_Erms_Test, L_Accuracy_Test, W_Mat = [], [], [], [], []
 
     for i in range(0, 400):
 
-        #print ('---------Iteration: ' + str(i) + '--------------')
+        print (f'---------Iteration: {i} M{M} LR {learningRate} L :{C_Lambda}--------------')
         Delta_E_D = -np.dot(
             (TrainingTarget[i] - np.dot(np.transpose(W_Now), TRAINING_PHI[i])),
             TRAINING_PHI[i])
@@ -64,8 +65,9 @@ def get_sgd_solution(TRAINING_PHI, TEST_PHI, VAL_PHI, W_Now, TrainingData,
         TEST_OUT = GetValTest(TEST_PHI, W_T_Next)
         Erms_Test = GetErms(TEST_OUT, TestDataAct)
         L_Erms_Test.append(float(Erms_Test.split(',')[1]))
+        L_Accuracy_Test.append(float(Erms_Test.split(',')[0]))
 
-    return ([L_Erms_TR, L_Erms_Val, L_Erms_Test])
+    return ([L_Erms_TR, L_Erms_Val, L_Erms_Test, L_Accuracy_Test])
 
 
 if __name__ == "__main__":
@@ -105,19 +107,21 @@ if __name__ == "__main__":
     print("------------------LeToR Data------------------------")
     print('----------------------------------------------------')
 
-    # KMeans to get centroids, Mu
+    # KMeans to get centroids, Mu for radial basis 
     kmeans = KMeans(
         n_clusters=M, random_state=0).fit(np.transpose(TrainingData))
     Mu = kmeans.cluster_centers_
 
     # Get the covariance matrix
-    BigSigma = GenerateBigSigma(RawData, Mu, TrainingPercent)
+    BigSigma = GenerateBigSigma(RawData, TrainingPercent)
 
-    #
+    # Initialise Radial Basis Function for 
+    # Training/Testing/Validation data
     TRAINING_PHI = GetPhiMatrix(RawData, Mu, BigSigma, TrainingPercent)
     TEST_PHI = GetPhiMatrix(TestData, Mu, BigSigma, 100)
     VAL_PHI = GetPhiMatrix(ValData, Mu, BigSigma, 100)
 
+    # Closed Form Solutuion
     W = GetWeightsClosedForm(TRAINING_PHI, TrainingTarget, (C_Lambda))
     W_Now = np.dot(220, W)
 
@@ -135,11 +139,11 @@ if __name__ == "__main__":
         TRAINING_PHI, TEST_PHI, VAL_PHI, TrainingData, TrainingTarget,
         TestData, ValData)
 
-    print("M = 10 \nLambda = 0.9")
+    print(f"M = {M} \nLambda = {C_Lambda")
     print("E_rms Training   = " + str(float(TrainingAccuracy.split(',')[1])))
     print("E_rms Validation = " + str(float(ValidationAccuracy.split(',')[1])))
     print("E_rms Testing    = " + str(float(TestAccuracy.split(',')[1])))
-
+    print("Accuracy Testing    = " + str(float(TestAccuracy.split(',')[0])))
 
     print("------------------SGD Solution----------------------")
     print('----------------------------------------------------')
@@ -147,13 +151,16 @@ if __name__ == "__main__":
     print('----------------------------------------------------')
     print('-------------Please Wait for 2 mins!----------------')
     print('----------------------------------------------------')
+    # learningRate = 5
 
-    L_Erms_TR, L_Erms_Val, L_Erms_Test = get_sgd_solution(
+    L_Erms_TR, L_Erms_Val, L_Erms_Test, L_Accuracy_Test = get_sgd_solution(
         TRAINING_PHI, TEST_PHI, VAL_PHI, W_Now, TrainingData, TrainingTarget,
         TestData, ValData)
 
     print('----------Gradient Descent Solution--------------------')
-    print("M = 15 \nLambda  = 0.0001\neta=0.01")
+    print(f"M = {M} \nLambda  = {C_Lambda}\neta={learningRate}")
     print("E_rms Training   = " + str(np.around(min(L_Erms_TR), 5)))
     print("E_rms Validation = " + str(np.around(min(L_Erms_Val), 5)))
     print("E_rms Testing    = " + str(np.around(min(L_Erms_Test), 5)))
+    print("Accuracy Testing   = " + str(np.around(max(L_Accuracy_Test), 5)))
+    # print("Testing Accuracy = " + str(np.around(min(L_Erms_Test), 5)))

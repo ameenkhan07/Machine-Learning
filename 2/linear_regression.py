@@ -2,8 +2,15 @@ import numpy as np
 import math
 
 
-def GenerateBigSigma(Data, MuMatrix, TrainingPercent):
-    """Generate and returns the Covariance Matrix
+def GenerateBigSigma(Data, TrainingPercent):
+    """Generate and returns the covariance Matrix for the data. 
+    Parameters:
+    -----------
+        Data : Raw data of 4 features
+        TrainingPercent: Percent of raw data which is for training purposes
+    Returns:
+    -------
+        BigSigma: Covariance
     """
 
     BigSigma = np.zeros((len(Data), len(Data)))
@@ -34,16 +41,22 @@ def GetScalar(DataRow, MuRow, BigSigInv):
 
 
 def GetRadialBasisOut(DataRow, MuRow, BigSigInv):
-    """Returns Gaussian Radial Basis Function
+    """Returns Gaussian Radial Basis Function for
     """
     phi_x = math.exp(-0.5 * GetScalar(DataRow, MuRow, BigSigInv))
     return phi_x
 
 
 def GetWeightsClosedForm(PHI, T, Lambda):
-    """Returns closed form solution of sum of squares error with
+    """Returns Moore-Penrose pseudo-inverse of the matrix phi with
     least squared regularization
+    Parameters:
+    ----------
+        PHI: PHI matrix for the 
+        T: Target values of the training data
+        Lambda: Regularization Value
     """
+    # Create Lambda identity matrix for vector operation
     Lambda_I = np.identity(len(PHI[0]))
     for i in range(0, len(PHI[0])):
         Lambda_I[i][i] = Lambda
@@ -58,8 +71,16 @@ def GetWeightsClosedForm(PHI, T, Lambda):
 
 
 def GetPhiMatrix(Data, MuMatrix, BigSigma, TrainingPercent=80):
-    """Computes and returns Moore Penrose pseudo inverse of the matrix,
-    PHI. Desing Matrix
+    """Computes and returns the design matrix
+    Parameters:
+    -----------
+        Data:
+        MuMatrix:
+        BigSigma:
+        TrainingPercent:
+    Returns:
+    ---------
+        PHI: Design Matrix
     """
     DataT = np.transpose(Data)
     TrainingLen = math.ceil(len(DataT) * (TrainingPercent * 0.01))
@@ -72,31 +93,28 @@ def GetPhiMatrix(Data, MuMatrix, BigSigma, TrainingPercent=80):
     return PHI
 
 
-def GetValTest(VAL_PHI, W):
+def GetValTest(PHI, W):
     """Computes and returns the linear regression function
     Parameters:
     -----------
-        VAL_PHI : M Basis Functions
+        PHI : M Basis Functions
         W : weight vector
     """
-    Y = np.dot(W, np.transpose(VAL_PHI))
+    Y = np.dot(W, np.transpose(PHI))
     ##print ("Test Out Generated..")
     return Y
 
 
 def GetErms(VAL_TEST_OUT, ValDataAct):
-    """Computes and returns Root Mean Square Error for evaluating the solution
+    """Computes and returns ERMS and accuracy values
+    rms for the output data
     """
-    sum = 0.0
-    t = 0
-    accuracy = 0.0
-    counter = 0
-    val = 0.0
+    _sum, _counter = 0.0, 0
     for i in range(0, len(VAL_TEST_OUT)):
-        sum = sum + math.pow((ValDataAct[i] - VAL_TEST_OUT[i]), 2)
+        _sum = _sum + math.pow((ValDataAct[i] - VAL_TEST_OUT[i]), 2)
         if (int(np.around(VAL_TEST_OUT[i], 0)) == ValDataAct[i]):
-            counter += 1
-    accuracy = (float((counter * 100)) / float(len(VAL_TEST_OUT)))
+            _counter += 1
+    accuracy = (float((_counter * 100)) / float(len(VAL_TEST_OUT)))
     ##print ("Accuracy Generated..")
-    ##print ("Validation E_RMS : " + str(math.sqrt(sum/len(VAL_TEST_OUT))))
-    return (str(accuracy) + ',' + str(math.sqrt(sum / len(VAL_TEST_OUT))))
+    ##print ("Validation E_RMS : " + str(math.sqrt(_sum/len(VAL_TEST_OUT))))
+    return (str(accuracy) + ',' + str(np.sqrt(np.mean(_sum))))
