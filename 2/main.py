@@ -5,19 +5,27 @@ from prep_data import *
 from linear_regression import *
 
 
+<<<<<<< Updated upstream
 # Constants used throughout the prog
-learningRate = 1
-C_Lambda = 0.01
+learningRate = 0.1
+C_Lambda = 0.3
+=======
+# Hyperparameters
+learningRate = 0.01
+C_Lambda =  0.1
+M = 20 # Number of Radial Basis Func
+
+# Data Split
+>>>>>>> Stashed changes
 TrainingPercent = 80 # Data Split for Training Data
 ValidationPercent = 10 # Data Split for Validation Data
 TestPercent = 10 # Data Split for Testing Data
-M = 10 # Number of Radial Basis Func
-PHI = [] 
+
 
 
 def get_closed_form_solution(TRAINING_PHI, TEST_PHI, VAL_PHI, TrainingData,
                              TrainingTarget, TestData, ValData):
-    """
+    """Computes weights and returns the Erms for training, testing and validation data, as well as the testing accuracy.
     """
     TR_TEST_OUT = GetValTest(TRAINING_PHI, W)
     VAL_TEST_OUT = GetValTest(VAL_PHI, W)
@@ -32,7 +40,7 @@ def get_closed_form_solution(TRAINING_PHI, TEST_PHI, VAL_PHI, TrainingData,
 
 def get_sgd_solution(TRAINING_PHI, TEST_PHI, VAL_PHI, W_Now, TrainingData,
                      TrainingTarget, TestData, ValData):
-    """
+    """Computed weights for x datapoints iteratively updating, and returns the Erms for training, testing and validation data, as well as the testing accuracy.
     """
     # Gradient Descent Solution for Linear Regression
     La = 2
@@ -41,7 +49,7 @@ def get_sgd_solution(TRAINING_PHI, TEST_PHI, VAL_PHI, W_Now, TrainingData,
 
     for i in range(0, 400):
 
-        print (f'---------Iteration: {i} M{M} LR {learningRate} L :{C_Lambda}--------------')
+        # print (f'---------Iteration: {i} M{M} LR {learningRate} L :{C_Lambda}--------------')
         Delta_E_D = -np.dot(
             (TrainingTarget[i] - np.dot(np.transpose(W_Now), TRAINING_PHI[i])),
             TRAINING_PHI[i])
@@ -135,15 +143,23 @@ if __name__ == "__main__":
     print("-------Closed Form with Radial Basis Function-------")
     print('----------------------------------------------------')
 
-    TrainingAccuracy, ValidationAccuracy, TestAccuracy = get_closed_form_solution(
-        TRAINING_PHI, TEST_PHI, VAL_PHI, TrainingData, TrainingTarget,
-        TestData, ValData)
+    # TrainingAccuracy, ValidationAccuracy, TestAccuracy = get_closed_form_solution(
+    #     TRAINING_PHI, TEST_PHI, VAL_PHI, TrainingData, TrainingTarget,
+    #     TestData, ValData)
 
-    print(f"M = {M} \nLambda = {C_Lambda")
+<<<<<<< Updated upstream
+    print(f"M = {M} \nLambda = {C_Lambda}")
     print("E_rms Training   = " + str(float(TrainingAccuracy.split(',')[1])))
     print("E_rms Validation = " + str(float(ValidationAccuracy.split(',')[1])))
     print("E_rms Testing    = " + str(float(TestAccuracy.split(',')[1])))
     print("Accuracy Testing    = " + str(float(TestAccuracy.split(',')[0])))
+=======
+    # print(f"M = {M} \nLambda = {C_Lambda}")
+    # print("E_rms Training   = " + str(float(TrainingAccuracy.split(',')[1])))
+    # print("E_rms Validation = " + str(float(ValidationAccuracy.split(',')[1])))
+    # print("E_rms Testing    = " + str(float(TestAccuracy.split(',')[1])))
+    # print("Accuracy Testing    = " + str(float(TestAccuracy.split(',')[0])))
+>>>>>>> Stashed changes
 
     print("------------------SGD Solution----------------------")
     print('----------------------------------------------------')
@@ -162,5 +178,4 @@ if __name__ == "__main__":
     print("E_rms Training   = " + str(np.around(min(L_Erms_TR), 5)))
     print("E_rms Validation = " + str(np.around(min(L_Erms_Val), 5)))
     print("E_rms Testing    = " + str(np.around(min(L_Erms_Test), 5)))
-    print("Accuracy Testing   = " + str(np.around(max(L_Accuracy_Test), 5)))
-    # print("Testing Accuracy = " + str(np.around(min(L_Erms_Test), 5)))
+    print("Testing Accuracy = " + str(np.around(min(L_Erms_Test), 5)))

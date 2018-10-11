@@ -117,4 +117,4 @@ def GetErms(VAL_TEST_OUT, ValDataAct):
     accuracy = (float((_counter * 100)) / float(len(VAL_TEST_OUT)))
     ##print ("Accuracy Generated..")
     ##print ("Validation E_RMS : " + str(math.sqrt(_sum/len(VAL_TEST_OUT))))
-    return (str(accuracy) + ',' + str(np.sqrt(np.mean(_sum))))
+    return (str(accuracy) + ',' + str(math.sqrt(sum / len(VAL_TEST_OUT))))
