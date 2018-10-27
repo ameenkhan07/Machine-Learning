@@ -16,44 +16,46 @@ GSC_features = 'GSC-Dataset/GSC-Features.csv'
 #     if not os.path.exists(OUTPUT_DIR):
 #             os.makedirs(OUTPUT_DIR)
 
+def _append_dataframes(same_data, diff_data):
+    """Appends the dataframes one after anothee
+    """
+    appended_data = pd.concat([same_data, diff_data])
+    return(appended_data)
+    # return(pd.concat([same_data, diff_data]))
+
 
 def _concat_dataframes(same_data, diff_data, features_data):
     """
     """
     # Combine the diff and concat data
-    merged_data = pd.concat([same_data, diff_data])
+    appended_data = _append_dataframes(same_data, diff_data)
+    if 'Unnamed: 0' in appended_data:
+        appended_data.drop(['Unnamed: 0'])
     # Merge the datatables, same and diff
-    merged_data = pd.merge(merged_data, features_data,
+    merged_data = pd.merge(appended_data, features_data,
                            left_on='img_id_A', right_on='img_id', how='left')
     merged_data = pd.merge(merged_data, features_data, left_on='img_id_B',
                            right_on='img_id', how='left', suffixes=('_a', '_b'))
-    # Slight preprocessing
-    # merged_data = merged_data.drop(
-    #     columns=['Unnamed: 0_a', 'Unnamed: 0_b'])
-    return(merged_data)
+    merged_data = merged_data.drop(columns = ['img_id_a', 'img_id_b'])
+    # print(merged_data.loc[:, 'f1_a':])
+    raw_data = merged_data.loc[:, 'f1_a':].values
+    raw_target = merged_data['target'].values
+    return(raw_data, raw_target)
 
 
 def _subtract_dataframes(same_data, diff_data, features_data):
     """Subtract img_id_a columns with img_id_b_columns
     """
-    merged_data = _concat_dataframes(same_data, diff_data, features_data)
-    merged_data['f1'] = abs(merged_data['f1_a']-merged_data['f1_b'])
-    merged_data['f2'] = abs(merged_data['f2_a']-merged_data['f2_b'])
-    merged_data['f3'] = abs(merged_data['f3_a']-merged_data['f3_b'])
-    merged_data['f4'] = abs(merged_data['f4_a']-merged_data['f4_b'])
-    merged_data['f5'] = abs(merged_data['f5_a']-merged_data['f5_b'])
-    merged_data['f6'] = abs(merged_data['f6_a']-merged_data['f6_b'])
-    merged_data['f7'] = abs(merged_data['f7_a']-merged_data['f7_b'])
-    merged_data['f8'] = abs(merged_data['f8_a']-merged_data['f8_b'])
-    merged_data['f9'] = abs(merged_data['f9_a']-merged_data['f9_b'])
-    merged_data = merged_data.drop(
-        columns=['img_id_a', 'img_id_b'])
-    merged_data = merged_data.drop(columns=['f1_a', 'f2_a', 'f3_a',
-                                            'f4_a', 'f5_a', 'f6_a', 'f7_a', 'f8_a', 'f9_a'])
-    merged_data = merged_data.drop(columns=['f1_b', 'f2_b', 'f3_b',
-                                            'f4_b', 'f5_b', 'f6_b', 'f7_b', 'f8_b', 'f9_b'])
-    # print(merged_data.shape, merged_data.columns.values, merged_data.loc[1, :])
-    return(merged_data)
+    appended_data = _append_dataframes(same_data, diff_data)
+    temp1 = pd.merge(appended_data, features_data,
+                     left_on='img_id_A', right_on='img_id', how='left')
+    temp2 = pd.merge(appended_data, features_data,
+                     left_on='img_id_B', right_on='img_id', how='left')
+    raw_data = abs(temp1.loc[:, 'f1':] - temp2.loc[:, 'f1':])
+    # print(raw_data.columns.values)
+    raw_target = appended_data['target'].values
+
+    return(raw_data, raw_target)
 
 
 def get_data_features(category='hod', operation='concat'):
@@ -71,21 +73,20 @@ def get_data_features(category='hod', operation='concat'):
     features_data = pd.read_csv(os.path.join(INPUT_DIR, features), sep=',')
 
     if operation == 'concat':
-        merged_data = _concat_dataframes(same_data, diff_data, features_data)
+        raw_data, raw_target = _concat_dataframes(same_data, diff_data, features_data)
 
     if operation == 'subtract':
-        merged_data = _subtract_dataframes(same_data, diff_data, features_data)
-    
-    merged_data = merged_data.drop(
-        columns=['img_id_a', 'img_id_b'])
-    merged_data = merged_data.sample(frac=1)
-    print(
-        f"Data Shape : {merged_data.shape}, Data Columns : {merged_data.columns.values}")
-    return(merged_data)
+        raw_data, raw_target = _subtract_dataframes(same_data, diff_data, features_data)
+
+    return(raw_data, raw_target)
 
 
 if __name__ == '__main__':
-    get_data_features('hod', operation='concat')
-    get_data_features('hod', operation='subtract')
-    get_data_features('gsc', operation='concat')
-    # get_data_features('gsc', operation='subtract')
+    data1_d, data1_f = get_data_features('hod', operation='concat')
+    print(data1_d.shape, data1_f.shape)
+    data2_d, data2_f = get_data_features('hod', operation='subtract')
+    print(data2_d.shape, data2_f.shape)
+    data3_d, data3_f = get_data_features('gsc', operation='concat')
+    print(data3_d.shape, data3_f.shape)
+    data4_d, data4_f = get_data_features('gsc', operation='subtract')
+    print(data4_d.shape, data4_f.shape)
