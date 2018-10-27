@@ -17,9 +17,10 @@ GSC_features = 'GSC-Dataset/GSC-Features.csv'
 #             os.makedirs(OUTPUT_DIR)
 
 def _append_dataframes(same_data, diff_data):
-    """Appends the dataframes one after anothee
+    """Appends the dataframes one after another.
     """
     appended_data = pd.concat([same_data, diff_data])
+    appended_data = appended_data.sample(frac=1)
     return(appended_data)
     # return(pd.concat([same_data, diff_data]))
 
