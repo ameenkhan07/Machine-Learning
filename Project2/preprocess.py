@@ -8,13 +8,10 @@ INPUT_DIR = 'data/'
 HOD_same = 'HumanObserved-Dataset/same_pairs.csv'
 HOD_diff = 'HumanObserved-Dataset/diffn_pairs.csv'
 HOD_features = 'HumanObserved-Dataset/HumanObserved-Features-Data.csv'
-
 GSC_same = 'GSC-Dataset/same_pairs.csv'
 GSC_diff = 'GSC-Dataset/diffn_pairs.csv'
 GSC_features = 'GSC-Dataset/GSC-Features.csv'
-# def _save(filename):
-#     if not os.path.exists(OUTPUT_DIR):
-#             os.makedirs(OUTPUT_DIR)
+
 
 def _remove_zero_cols(data):
     """Returns ndarray with no zero columns
@@ -23,6 +20,7 @@ def _remove_zero_cols(data):
     data = data[~np.all(data == 0, axis=1)]
     data = data.transpose()
     return data
+
 
 def _append_dataframes(same_data, diff_data):
     """Appends the dataframes one after another.
