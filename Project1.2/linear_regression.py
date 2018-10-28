@@ -6,7 +6,7 @@ def GenerateBigSigma(Data, TrainingPercent):
     """Generate and returns the covariance Matrix for the data. 
     Parameters:
     -----------
-        Data : Raw data of 4 features
+        Data : Raw data of 41, features
         TrainingPercent: Percent of raw data which is for training purposes
     Returns:
     -------
