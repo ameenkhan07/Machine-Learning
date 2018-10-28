@@ -62,6 +62,8 @@ def _subtract_dataframes(same_data, diff_data, features_data):
     temp2 = pd.merge(appended_data, features_data,
                      left_on='img_id_B', right_on='img_id', how='left')
     raw_data = abs(temp1.loc[:, 'f1':] - temp2.loc[:, 'f1':]).values
+
+    raw_data = _remove_zero_cols(raw_data)
     raw_target = appended_data['target'].values
 
     return(raw_data, raw_target)
