@@ -10,12 +10,19 @@ HOD_diff = 'HumanObserved-Dataset/diffn_pairs.csv'
 HOD_features = 'HumanObserved-Dataset/HumanObserved-Features-Data.csv'
 
 GSC_same = 'GSC-Dataset/same_pairs.csv'
-GSC_diff = 'GSC-Dataset/same_pairs.csv'
 GSC_diff = 'GSC-Dataset/diffn_pairs.csv'
 GSC_features = 'GSC-Dataset/GSC-Features.csv'
 # def _save(filename):
 #     if not os.path.exists(OUTPUT_DIR):
 #             os.makedirs(OUTPUT_DIR)
+
+def _remove_zero_cols(data):
+    """Returns ndarray with no zero columns
+    """
+    data = data.transpose()
+    data = data[~np.all(data == 0, axis=1)]
+    data = data.transpose()
+    return data
 
 def _append_dataframes(same_data, diff_data):
     """Appends the dataframes one after another.
@@ -23,7 +30,6 @@ def _append_dataframes(same_data, diff_data):
     appended_data = pd.concat([same_data, diff_data])
     appended_data = appended_data.sample(frac=1)
     return(appended_data)
-    # return(pd.concat([same_data, diff_data]))
 
 
 def _concat_dataframes(same_data, diff_data, features_data):
@@ -31,16 +37,18 @@ def _concat_dataframes(same_data, diff_data, features_data):
     """
     # Combine the diff and concat data
     appended_data = _append_dataframes(same_data, diff_data)
-    if 'Unnamed: 0' in appended_data:
-        appended_data.drop(['Unnamed: 0'])
+    # Remove columns if exist
+    if 'Unnamed: 0' in features_data.columns.values:
+        features_data = features_data.drop(columns=['Unnamed: 0'])
+
     # Merge the datatables, same and diff
     merged_data = pd.merge(appended_data, features_data,
                            left_on='img_id_A', right_on='img_id', how='left')
     merged_data = pd.merge(merged_data, features_data, left_on='img_id_B',
                            right_on='img_id', how='left', suffixes=('_a', '_b'))
-    merged_data = merged_data.drop(columns = ['img_id_a', 'img_id_b'])
-    # print(merged_data.loc[:, 'f1_a':])
+    merged_data = merged_data.drop(columns=['img_id_a', 'img_id_b'])
     raw_data = merged_data.loc[:, 'f1_a':].values
+    raw_data = _remove_zero_cols(raw_data)
     raw_target = merged_data['target'].values
     return(raw_data, raw_target)
 
@@ -53,8 +61,7 @@ def _subtract_dataframes(same_data, diff_data, features_data):
                      left_on='img_id_A', right_on='img_id', how='left')
     temp2 = pd.merge(appended_data, features_data,
                      left_on='img_id_B', right_on='img_id', how='left')
-    raw_data = abs(temp1.loc[:, 'f1':] - temp2.loc[:, 'f1':])
-    # print(raw_data.columns.values)
+    raw_data = abs(temp1.loc[:, 'f1':] - temp2.loc[:, 'f1':]).values
     raw_target = appended_data['target'].values
 
     return(raw_data, raw_target)
@@ -75,10 +82,12 @@ def get_data_features(category='hod', operation='concat'):
     features_data = pd.read_csv(os.path.join(INPUT_DIR, features), sep=',')
 
     if operation == 'concat':
-        raw_data, raw_target = _concat_dataframes(same_data, diff_data, features_data)
+        raw_data, raw_target = _concat_dataframes(
+            same_data, diff_data, features_data)
 
     if operation == 'subtract':
-        raw_data, raw_target = _subtract_dataframes(same_data, diff_data, features_data)
+        raw_data, raw_target = _subtract_dataframes(
+            same_data, diff_data, features_data)
 
     return(raw_data, raw_target)
 
