@@ -11,6 +11,7 @@ HOD_features = 'HumanObserved-Dataset/HumanObserved-Features-Data.csv'
 
 GSC_same = 'GSC-Dataset/same_pairs.csv'
 GSC_diff = 'GSC-Dataset/same_pairs.csv'
+GSC_diff = 'GSC-Dataset/diffn_pairs.csv'
 GSC_features = 'GSC-Dataset/GSC-Features.csv'
 # def _save(filename):
 #     if not os.path.exists(OUTPUT_DIR):
