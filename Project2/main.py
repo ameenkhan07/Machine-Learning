@@ -2,6 +2,7 @@ import math
 from preprocess import *
 from linear_regression import *
 from logistic_regression import *
+from sequential_neural_network import *
 
 # Linear Regression Variables
 TrainingPercent = 80  # Data Split for Training Data
@@ -74,3 +75,18 @@ print("-----------------Logistic Regression (SGD)---------------------")
 print(f"\neta={learningRate}")
 accuracy = logistic_regression.get_sgd_solution()
 print(f"Accuracy : {accuracy}")
+
+
+# Initialise Neural Network
+nn = SequentialNeuralNetwork(
+    raw_data, raw_target,
+    training_data, training_target,
+    testing_data, testing_target,
+    validation_data, validation_target
+)
+print("-----------------Neural Netowrk (SGD)---------------------")
+model = nn.get_model()
+history = nn.run_model(model)
+# save_plot(history.history, 'keras.png')
+# Test Accuracy
+nn.test_model(model)
