@@ -1,6 +1,7 @@
 import math
 from preprocess import *
 from linear_regression import *
+from logistic_regression import *
 
 # Linear Regression Variables
 TrainingPercent = 80  # Data Split for Training Data
@@ -44,11 +45,23 @@ linear_regression = LinearRegression(
     testing_data, testing_target,
     validation_data, validation_target
 )
+
 # Execute Linear Regression
 L_Erms_TR, L_Erms_Val, L_Erms_Test, L_Accuracy_Test = linear_regression.get_sgd_solution()
-
 print(f"M = {M} \nLambda  = {C_Lambda}\neta={learningRate}")
 print("E_rms Training   = " + str(np.around(min(L_Erms_TR), 5)))
 print("E_rms Validation = " + str(np.around(min(L_Erms_Val), 5)))
 print("E_rms Testing    = " + str(np.around(min(L_Erms_Test), 5)))
 print("Testing Accuracy = " + str(np.around(min(L_Erms_Test), 5)))
+
+# Initialise Logistic Regression
+logistic_regression = LogisticRegression(
+    raw_data, raw_target,
+    training_data, training_target,
+    testing_data, testing_target,
+    validation_data, validation_target
+)
+# Execute Linear Regression
+accuracy = logistic_regression.get_sgd_solution()
+print(f"Accuracy : {accuracy}")
+

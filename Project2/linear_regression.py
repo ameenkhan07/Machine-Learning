@@ -82,9 +82,6 @@ class LinearRegression:
         DataT = np.transpose(Data)
         TrainingLen = math.ceil(len(DataT))
         PHI = np.zeros((int(TrainingLen), len(self.Mu)))
-        # print(np.diag(BigSigma))
-        # BigSigma[np.diag_indices_from(BigSigma)] +=1
-        # print(np.diag(BigSigma))
 
         BigSigInv = np.linalg.inv(self.BigSigma)
         for C in range(0, len(self.Mu)):
