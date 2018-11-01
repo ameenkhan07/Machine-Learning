@@ -12,8 +12,8 @@ class LinearRegression:
         self.training_data, self.training_target = args[2], args[3]
         self.testing_data, self.testing_target = args[4], args[5]
         self.validation_data, self.validation_target = args[6], args[7]
-        self.M = 10
-        self.learning_rate = 0.01
+        self.M, self.C_Lambda = args[8], args[9]
+        self.learning_rate = args[10]
         self.Mu = self.get_mu()
         self.BigSigma = self.GenerateBigSigma(self.raw_data)
         self.W = np.array([0]*self.M)
@@ -120,7 +120,7 @@ class LinearRegression:
         """Computed weights for x datapoints iteratively updating, and returns the Erms for training, testing and validation data, as well as the testing accuracy.
         """
         # Gradient Descent Solution for Linear Regression
-        La = 2
+        La = self.C_Lambda
         L_Erms_Val, L_Erms_TR, L_Erms_Test, L_Accuracy_Test, W_Mat = [], [], [], [], []
 
         for i in range(0, epochs):
