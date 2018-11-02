@@ -13,12 +13,12 @@ print('Person Number = 50288968')
 print('----------------------------------------------------')
 
 # Preprocess Data
-raw_data, raw_target = get_data_features('hod', operation='concat')
-print('HOD CONCAT')
+# raw_data, raw_target = get_data_features('hod', operation='concat')
+# print('HOD CONCAT')
 # raw_data, raw_target = get_data_features('hod', operation='subtract')
 # print('HOD SUBTRACT')
-# raw_data, raw_target = get_data_features('gsc', operation='concat')
-# print('GSC CONCAT')
+raw_data, raw_target = get_data_features('gsc', operation='concat')
+print('GSC CONCAT')
 # raw_data, raw_target = get_data_features('gsc', operation='subtract')
 # print('GSC SUBTRACT')
 
