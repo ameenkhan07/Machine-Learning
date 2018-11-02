@@ -3,6 +3,7 @@ from preprocess import *
 from linear_regression import *
 from logistic_regression import *
 from sequential_neural_network import *
+import numpy as np
 
 # Linear Regression Variables
 TrainingPercent = 80  # Data Split for Training Data
@@ -15,13 +16,14 @@ print('----------------------------------------------------')
 
 # Preprocess Data
 # raw_data, raw_target = get_data_features('hod', operation='concat')
-# print('HOD CONCAT')
+# print('HOD CONCATENATED DATASET')
 # raw_data, raw_target = get_data_features('hod', operation='subtract')
-# print('HOD SUBTRACT')
+# print('HOD SUBTRACTED DATASET')
 raw_data, raw_target = get_data_features('gsc', operation='concat')
-print('GSC CONCAT')
+print('GSC CONCATENATED DATASET')
 # raw_data, raw_target = get_data_features('gsc', operation='subtract')
-# print('GSC SUBTRACT')
+# print('GSC SUBTRACTED DATASET')
+print('----------------------------------------------------')
 
 # Data split into training/validation/testing
 training_ratio = math.floor(raw_data.shape[0]*.8)
@@ -40,10 +42,11 @@ print('DATA SPLIT : ', training_data.shape,
 print('TARGET SPLIT : ', training_target.shape,
       testing_target.shape, validation_target.shape)
 
-
+# Hyperparameter Initialization
 M = 10
 C_Lambda = 0.03
-learningRate = 0.01
+learningRate = 0.1
+
 # Initialise Linear Regression
 linear_regression = LinearRegression(
     raw_data, raw_target,
@@ -52,7 +55,6 @@ linear_regression = LinearRegression(
     validation_data, validation_target,
     M, C_Lambda, learningRate
 )
-
 # Execute Linear Regression
 L_Erms_TR, L_Erms_Val, L_Erms_Test, L_Accuracy_Test = linear_regression.get_sgd_solution()
 print("-----------------Linear Regression (SGD)---------------------")
@@ -62,31 +64,31 @@ print("E_rms Validation = " + str(np.around(min(L_Erms_Val), 5)))
 print("E_rms Testing    = " + str(np.around(min(L_Erms_Test), 5)))
 print("Testing Accuracy = " + str(np.around(min(L_Erms_Test), 5)))
 
-# # # Initialise Logistic Regression
+# Initialise Logistic Regression
 logistic_regression = LogisticRegression(
     raw_data, raw_target,
     training_data, training_target,
     testing_data, testing_target,
-    validation_data, validation_target,
     learningRate
 )
-# Execute Linear Regression
+# Execute Logistic Regression
 print("-----------------Logistic Regression (SGD)---------------------")
 print(f"\neta={learningRate}")
 accuracy = logistic_regression.get_sgd_solution()
 print(f"Accuracy : {accuracy}")
 
 
-# Initialise Neural Network
+# Initialise Seuquential Neural Network
 nn = SequentialNeuralNetwork(
     raw_data, raw_target,
     training_data, training_target,
-    testing_data, testing_target,
-    validation_data, validation_target
+    testing_data, testing_target
 )
+# Execute Neural Network model
 print("-----------------Neural Netowrk (SGD)---------------------")
 model = nn.get_model()
 history = nn.run_model(model)
-# save_plot(history.history, 'keras.png')
+save_plot(history.history, 'keras.png')
 # Test Accuracy
-nn.test_model(model)
+accuracy = nn.test_model(model)
+print("Testing Accuracy: " + accuracy)

@@ -8,8 +8,7 @@ class LogisticRegression:
         self.raw_data, self.raw_target = args[0], args[1]
         self.training_data, self.training_target = args[2], args[3]
         self.testing_data, self.testing_target = args[4], args[5]
-        self.validation_data, self.validation_target = args[6], args[7]
-        self.learning_rate = args[8]
+        self.learning_rate = args[6]
         self.learning_rate = 0.01
         self.la = 2
         self.W = np.random.rand(self.training_data.shape[0])

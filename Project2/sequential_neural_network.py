@@ -1,16 +1,16 @@
-# from process_dataset import (processData, encodeData, encodeLabel, decodeLabel)
 import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense, Activation, Dropout
 from keras.callbacks import EarlyStopping, TensorBoard
 from keras.utils import np_utils
 import matplotlib.pyplot as plt
-# from utils import get_data, save_data
-
 import tensorflow as tf
 import random as rn
+import pandas as pd
 import os
 os.environ['PYTHONHASHSEED'] = '0'
+
+OUTPUT_DIR = 'outputs'
 
 
 def save_plot(history, filename):
@@ -35,17 +35,10 @@ class SequentialNeuralNetwork:
         self.raw_data, self.raw_target = args[0], args[1]
         self.training_data, self.training_target = args[2], args[3]
         self.testing_data, self.testing_target = args[4], args[5]
-        self.validation_data, self.validation_target = args[6], args[7]
         # self.learning_rate = 0.01
-        # self.epochs = 1000
-        # self.architecture = {
-        #     'first_layer' : (512,'relu'),
-        #     'second_layer': (256, 'relu'),
-        #     'output_layer' : (4, 'softmax'),
-        #     'dropout' : 0.3
-        # }
-        # self.optimzer = 'adadelta'
-        # self.loss = 'categorical_crossentropy'
+        self.epochs = 5000
+        self.optimzer = 'adadelta'
+        self.loss = 'categorical_crossentropy'
 
     def get_model(self):
         """Defines and returns Sequential NN model
@@ -62,32 +55,27 @@ class SequentialNeuralNetwork:
         # print(self.training_data.shape[0])
         input_size = self.training_data.shape[0]  # 2^10 > 1000
         first_dense_layer_nodes = 2048  # first hidden layer
-        # second_dense_layer_nodes = 1024  # first hidden layer
-        third_dense_layer_nodes = 2  # output layer, no of classes of classification problem
+        third_dense_layer_nodes = 2  # output layer, no. of classes of classification problem
         drop_out = 0.3  # Dropout Rate, adjusting for overfitting
 
         model = Sequential()
 
         # Input Layer(First Layer):
         model.add(Dense(first_dense_layer_nodes, input_dim=input_size))
+        model.add(Activation('relu'))
         model.add(Dropout(drop_out))
-
-        # Second Hidden Layer
-        # model.add(Dense(second_dense_layer_nodes))
-        # model.add(Activation('relu'))
-        # model.add(Dropout(drop_out))
 
         # Output Layer
         model.add(Dense(third_dense_layer_nodes))
-        model.add(Activation('softmax'))
+        model.add(Activation('sigmoid'))
 
         # Overview of the defined architecture
         model.summary()
 
         # Network Compilation Step : learning process is configured
         model.compile(
-            optimizer='sgd',
-            loss='categorical_crossentropy',
+            optimizer=self.optimzer,
+            loss=self.loss,
             metrics=['accuracy'])
 
         return model
@@ -110,7 +98,7 @@ class SequentialNeuralNetwork:
         # Parameters used in Training Phase
 
         # Epochs : each iteration over entire data
-        num_epochs = 10000
+        num_epochs = self.epochs
 
         # Mini batch size,
         # each epoch consists this many samples of data multiple times
@@ -171,7 +159,6 @@ class SequentialNeuralNetwork:
         for i, j in zip(processedTestData, processedTestLabel):
             y = model.predict(
                 np.array(i).reshape(-1, self.testing_data.shape[0]))
-            # predictedTestLabel.append(decodeLabel(y.argmax()))
 
             if j.argmax() == y.argmax():
                 right = right + 1
@@ -179,12 +166,6 @@ class SequentialNeuralNetwork:
                 wrong = wrong + 1
 
         print("Errors: " + str(wrong), " Correct :" + str(right))
-
-        print("Testing Accuracy: " + str(right / (right + wrong) * 100))
-
-        # output = {}
-        # output["input"] = testData['input']
-        # output["label"] = testData['label']
-        # output["predicted_label"] = predictedTestLabel
-
-        # save_data(output, 'output.csv', 'outputs')
+        accuracy = str(right / (right + wrong) * 100)
+        # print("Testing Accuracy: " + accuracy)
+        return(accuracy)
