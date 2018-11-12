@@ -9,11 +9,7 @@ source virtualenv/bin/activate
 # Install all libraries
 pip install jupyter --user
 pip3 install --upgrade tensorflow
-pip3 install keras
-pip3 install matplotlib
-pip3 install pandas
-pip3 install numpy
-pip3 install pandas
+pip3 install pandas numpy keras matplotlib
 ```
 
 ### Code Files
