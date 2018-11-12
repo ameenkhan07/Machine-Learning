@@ -4,8 +4,10 @@ import numpy as np
 import os
 from PIL import Image
 
-MNIST_data_files = 'mnist.pkl.gz'
-USPS_data_files = 'USPSdata/Numerals'
+data = {
+    'mnist': 'data/mnist.pkl.gz',
+    'usps': 'data/USPSdata/Numerals'
+}
 
 
 def encode(l):
@@ -17,7 +19,7 @@ def encode(l):
 def get_MNIST_data():
     """
     """
-    f = gzip.open(MNIST_data_files, 'rb')
+    f = gzip.open(data['mnist'], 'rb')
     train_data, validation_data, test_data = pickle.load(
         f, encoding='latin1')
     f.close()
@@ -38,7 +40,7 @@ def get_USPS_data():
     USPSMat, USPSTar = [], []
     savedImg, labels = [], []
     for j in range(0, 10):
-        curFolderPath = USPS_data_files + '/' + str(j)
+        curFolderPath = data['usps'] + '/' + str(j)
         imgs = os.listdir(curFolderPath)
         for img in imgs:
             curImg = curFolderPath + '/' + img
