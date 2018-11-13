@@ -5,12 +5,28 @@ import math
 class SoftmaxRegression:
 
     def __init__(self, *args):
-        self.train_data, self.train_tar, self.train_labels = args[0], args[1], args[2]
-        self.validation_data, self.validation_tar, self.validation_labels = args[
-            3], args[4], args[4]
+        self.train_data, self.train_tar, self.train_labels = self._add_bias(
+            args[0]), args[1], args[2]
+        self.val_data, self.val_tar, self.val_labels = self._add_bias(
+            args[3]), args[4], args[5]
+        self.test_data, self.test_tar, self.test_labels = self._add_bias(
+            args[6]), args[7], args[8]
+        self.lmbda = 0.01
+        self.alpha = 0.01
+        self.minibatch_size = 20
 
-    def _calculate_entropy_loss(self, X, w, y):
+    def _add_bias(self, data):
+        """Adding Bias term to dataset
         """
+        return(np.hstack((np.zeros(shape=(data.shape[0], 1), dtype='float') + 1, data)))
+
+    def _one_hot_encoding(self, t):
+        """Converting one hot vector to corresponding digit.
+        """
+        return(np.argmax(t, axis=1))
+
+    def _get_entropy_loss(self, X, w, y):
+        """Cross Entropy Cost function for optimising our model weights
         """
         loss = 0
         t = np.dot(X, w)
@@ -18,10 +34,10 @@ class SoftmaxRegression:
             loss += -1 * np.dot(y[i], np.log(t[i].T))
         return(float(loss)/len(t))
 
-    def _softmax(self, X, theta):
+    def _softmax(self, X, weight):
         """
         """
-        t = np.dot(X, theta)
+        t = np.dot(X, weight)
         prob_matrix = []
         for i in range(len(t)):
             prob_vector = []
@@ -33,83 +49,68 @@ class SoftmaxRegression:
             prob_matrix.append(prob_vector)
         return(np.array(prob_matrix))
 
-    def add_ones(self, X):
-        """Adding Bias term
-        """
-        return(np.hstack((np.zeros(shape=(X.shape[0], 1), dtype='float') + 1, X)))
-
-    def _one_hot_encoding(self, t):
-        """Reverse binary encoding to decimal
-        """
-        return(np.argmax(t, axis=1))
-
-    def accuracy(self, y, t):
+    def _get_accuracy(self, y, t):
         """
         """
-        count = sum([1 for i in range(len(y)) if y[i]==t[i]])
+        count = sum([1 for i in range(len(y)) if y[i] == t[i]])
         return(float(count)/len(y))
 
-    def output_accuracy():
-        """
-        """
-        pass
-
     def get_sgd_solution(self):
-        """
+        """Return Training, Validation and Testing accuracy using softmax regression
         """
         X, y = self.train_data, self.train_labels
-        valid_dataset, valid_labels = self.validation_data, self.validation_labels
-        raw_train_labels, raw_valid_labels = self.train_tar, self.validation_tar
-        X = self.add_ones(X)  # Bias term
-
-        epochs = 200
-        batch_size = 20
-        # Initialise random weights
-        theta = np.random.rand(X.shape[1], len(y[0]))
-
-        lmbda, alpha = 0.01, 0.01
+        epochs, mb_size = 200, self.minibatch_size
         max_error = 0.1
-        # loss = 10
 
-        err_iteration, train_accuracy, validation_accuracy = [], [], []
+        # Initialise random weights
+        weight = np.random.rand(X.shape[1], len(y[0]))
 
-        # SGD
+        loss_list = []
+        train_acc_list, val_acc_list, test_acc_list = [], [], []
+
+        # Minibatch Stochastic Descent
         for iteration in range(epochs):
-            start = 0
-            for i in range(X.shape[0]//batch_size):
+
+            mb_pos = 0
+            for i in range(X.shape[0]//mb_size):
+                mb_next = mb_pos+mb_size
                 out_probs = self._softmax(
-                    X[start:start+batch_size], theta)
-                grad = (1.0/batch_size) * \
-                    np.dot(X[start:start+batch_size].T,
-                           (out_probs - y[start:start+batch_size]))
+                    X[mb_pos:mb_next], weight)
+                grad = (1.0/mb_size) * np.dot(X[mb_pos:mb_next].T,
+                                              (out_probs - y[mb_pos:mb_next]))
                 g0 = grad[0]
-                grad += ((lmbda * theta) / batch_size)
+                grad += ((self.lmbda * weight) / mb_size)
                 grad[0] = g0
-                theta -= alpha * grad
+                weight -= self.alpha * grad
 
                 # calculate the magnitude of the gradient and check for convergence
-                loss = self._calculate_entropy_loss(
-                    X[start:start+batch_size], theta, y)
-                start += batch_size
+                loss = self._get_entropy_loss(
+                    X[mb_pos:mb_next], weight, y)
 
-            err_iteration.append(loss)
+                mb_pos = mb_next
 
-            # ???
-            pred_output_train = np.dot(X, theta)
-            train_accuracy.append(
-                self.accuracy(raw_train_labels, self._one_hot_encoding(pred_output_train)))
-            # ???
-            pred_output_valid = np.dot(self.add_ones(valid_dataset), theta)
-            validation_accuracy.append(
-                self.accuracy(raw_valid_labels, self._one_hot_encoding(pred_output_valid)))
+            # Track loss of this iteration
+            loss_list.append(loss)
 
-            print(f' Iteration : {iteration}, LOSS : {loss}')
-            # Early Stopping
+            # Training Accuracy
+            pred_train = self._one_hot_encoding(np.dot(X, weight))
+            train_acc_list.append(
+                self._get_accuracy(self.train_tar, pred_train))
+            # Validation Accuracy
+            pred_val = self._one_hot_encoding(
+                np.dot(self.val_data, weight))
+            val_acc_list.append(
+                self._get_accuracy(self.val_tar, pred_val))
+            # Testing Accuracy
+            pred_test = self._one_hot_encoding(
+                np.dot(self.test_data, weight))
+            test_acc_list.append(
+                self._get_accuracy(self.test_tar, pred_test))
+
+            print(f'-------Iteration : {iteration}, LOSS : {loss}---------')
+
+            # Early Stopping exit
             if np.abs(loss) < max_error or math.isnan(loss):
                 break
 
-        # Output Training Accuracy
-        # Output Validation Accuracy
-        # Output Testing Accuracy
-
-        return(theta, err_iteration, train_accuracy, validation_accuracy)
+        return(loss_list, train_acc_list, val_acc_list, test_acc_list)
