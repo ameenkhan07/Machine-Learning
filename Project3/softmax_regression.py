@@ -55,7 +55,7 @@ class SoftmaxRegression:
         count = sum([1 for i in range(len(y)) if y[i] == t[i]])
         return(float(count)/len(y))
 
-    def get_sgd_solution(self):
+    def get_sgd_solution(self, verbose=0):
         """Return Training, Validation and Testing accuracy using softmax regression
         """
         X, y = self.train_data, self.train_labels
@@ -114,7 +114,8 @@ class SoftmaxRegression:
                 self._get_accuracy(self.test_tar, pred_test))
             pred_test_list.append(pred_test)
 
-            print(f'-------Iteration : {iteration}, LOSS : {loss}---------')
+            if verbose:
+                print(f'-------Iteration : {iteration}, LOSS : {loss}---------')
 
             # Early Stopping exit
             if np.abs(loss) < max_error or math.isnan(loss):

@@ -40,7 +40,7 @@ class SequentialNeuralNetwork:
 
         return model
 
-    def run_model(self, model):
+    def run_model(self, model, v=0):
         """
         """
         # NN Execution params
@@ -52,12 +52,12 @@ class SequentialNeuralNetwork:
         tensorboard_cb = TensorBoard(
             log_dir='logs', batch_size=tb_batch_size, write_graph=True)
         earlystopping_cb = EarlyStopping(
-            monitor='val_loss', verbose=1, patience=early_patience)
+            monitor='val_loss', verbose=0, patience=early_patience)
 
         # print(self.train_data.shape, self.train_labels.shape)
         history = model.fit(self.train_data, self.train_labels,
                             validation_split=validation_data_split,
-                            epochs=self.epochs, batch_size=model_batch_size,
+                            verbose=0, epochs=self.epochs, batch_size=model_batch_size,
                             callbacks=[tensorboard_cb, earlystopping_cb]
                             )
 

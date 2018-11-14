@@ -15,7 +15,8 @@ def save_plot(plt, filename):
     """
     if not os.path.exists(OUTPUT_DIR):
         os.makedirs(OUTPUT_DIR)
-
+    if 'png' not in filename:
+        filename+='.png'
     plt.savefig(os.path.join(OUTPUT_DIR, filename))
 
 
@@ -31,7 +32,7 @@ def _conf_matrix_accuracy(confusion_matrix):
 
 def _plot_confusion_matrix(cm, filename):
     """Plots the confusion matrix.
-    
+
     https://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html
     """
     title = 'Confusion Matrix'
