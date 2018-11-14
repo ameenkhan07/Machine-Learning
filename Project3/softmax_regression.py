@@ -4,7 +4,7 @@ import math
 
 class SoftmaxRegression:
 
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
         self.train_data, self.train_tar, self.train_labels = self._add_bias(
             args[0]), args[1], args[2]
         self.val_data, self.val_tar, self.val_labels = self._add_bias(
@@ -67,6 +67,7 @@ class SoftmaxRegression:
 
         loss_list = []
         train_acc_list, val_acc_list, test_acc_list = [], [], []
+        pred_test_list = []
 
         # Minibatch Stochastic Descent
         for iteration in range(epochs):
@@ -74,13 +75,17 @@ class SoftmaxRegression:
             mb_pos = 0
             for i in range(X.shape[0]//mb_size):
                 mb_next = mb_pos+mb_size
+
+                # Get Gradient
                 out_probs = self._softmax(
                     X[mb_pos:mb_next], weight)
+
                 grad = (1.0/mb_size) * np.dot(X[mb_pos:mb_next].T,
                                               (out_probs - y[mb_pos:mb_next]))
                 g0 = grad[0]
                 grad += ((self.lmbda * weight) / mb_size)
                 grad[0] = g0
+
                 weight -= self.alpha * grad
 
                 # calculate the magnitude of the gradient and check for convergence
@@ -101,11 +106,13 @@ class SoftmaxRegression:
                 np.dot(self.val_data, weight))
             val_acc_list.append(
                 self._get_accuracy(self.val_tar, pred_val))
+
             # Testing Accuracy
             pred_test = self._one_hot_encoding(
                 np.dot(self.test_data, weight))
             test_acc_list.append(
                 self._get_accuracy(self.test_tar, pred_test))
+            pred_test_list.append(pred_test)
 
             print(f'-------Iteration : {iteration}, LOSS : {loss}---------')
 
@@ -113,4 +120,4 @@ class SoftmaxRegression:
             if np.abs(loss) < max_error or math.isnan(loss):
                 break
 
-        return(loss_list, train_acc_list, val_acc_list, test_acc_list)
+        return(loss_list, train_acc_list, val_acc_list, test_acc_list, pred_test_list)

@@ -63,7 +63,8 @@ class SequentialNeuralNetwork:
 
         return(history)
 
-    def test_model(self, model, test_data, test_label):
-        """Computes the loss based on the input you pass it
+    def get_predicted_data(self, model, test_data):
+        """Return predicted target values
         """
-        return(model.evaluate(test_data, test_label, batch_size=128, verbose=1))
+        t = model.predict(test_data, batch_size=None, verbose=0, steps=None)
+        return np.argmax(t, axis=1)
