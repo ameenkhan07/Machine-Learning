@@ -1,6 +1,8 @@
 import pickle
 import gzip
 import numpy as np
+from keras.utils import np_utils
+
 import os
 from PIL import Image
 
@@ -15,6 +17,8 @@ def encode(l):
     """
     return((np.arange(10) == l[:, None]).astype(np.float32))
 
+def _encode_label(labels):
+    return np_utils.to_categorical(np.array(labels),10)
 
 def get_MNIST_data():
     """
@@ -51,4 +55,6 @@ def get_USPS_data():
                 imgdata = (255-np.array(img.getdata()))/255
                 USPSMat.append(imgdata)
                 USPSTar.append(j)
-    return(USPSMat, USPSTar)
+
+    USPSLabel = _encode_label(USPSTar)
+    return(np.asarray(USPSMat), np.asarray(USPSTar), np.asarray(USPSLabel))
