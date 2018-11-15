@@ -12,7 +12,7 @@ class SoftmaxRegression:
         self.test_data, self.test_tar, self.test_labels = self._add_bias(
             args[6]), args[7], args[8]
         self.lmbda = 0.01
-        self.alpha = 0.01
+        self.learning_rate = 0.01
         self.minibatch_size = 20
 
     def _add_bias(self, data):
@@ -25,8 +25,14 @@ class SoftmaxRegression:
         """
         return(np.argmax(t, axis=1))
 
-    def _get_entropy_loss(self, X, w, y):
-        """Cross Entropy Cost function for optimising our model weights
+    def _get_accuracy(self, y, t):
+        """
+        """
+        count = sum([1 for i in range(len(y)) if y[i] == t[i]])
+        return(float(count)/len(y))
+
+    def _get_cross_entropy_loss(self, X, w, y):
+        """Cross Entropy Cost function for optimising our weights
         """
         loss = 0
         t = np.dot(X, w)
@@ -35,90 +41,86 @@ class SoftmaxRegression:
         return(float(loss)/len(t))
 
     def _softmax(self, X, weight):
+        """N-class softmax function used in logistic regression
+        Returns class probabilites.
         """
-        """
-        t = np.dot(X, weight)
-        prob_matrix = []
-        for i in range(len(t)):
-            prob_vector = []
-            sum_exp = 0
-            for j in t[i]:
-                sum_exp += np.exp(j)
-            for k in t[i]:
-                prob_vector.append(float(np.exp(k))/sum_exp)
-            prob_matrix.append(prob_vector)
-        return(np.array(prob_matrix))
-
-    def _get_accuracy(self, y, t):
-        """
-        """
-        count = sum([1 for i in range(len(y)) if y[i] == t[i]])
-        return(float(count)/len(y))
+        activation = np.dot(X, weight)
+        p_matrix = []
+        # arranging weight vectors as matrix for probability
+        for i in range(len(activation)):
+            exp_summation = sum([np.exp(j) for j in activation[i]])
+            _list = [(float(np.exp(k))/exp_summation) for k in activation[i]]
+            p_matrix.append(_list)
+        return(np.array(p_matrix))
 
     def get_sgd_solution(self, verbose=0):
         """Return Training, Validation and Testing accuracy using softmax regression
         """
-        X, y = self.train_data, self.train_labels
+        X, t = self.train_data, self.train_labels
         epochs, mb_size = 200, self.minibatch_size
-        max_error = 0.1
+        early_stopping_error = 0.1  # Used
 
         # Initialise random weights
-        weight = np.random.rand(X.shape[1], len(y[0]))
+        weight = np.random.rand(X.shape[1], len(t[0]))
 
         loss_list = []
-        train_acc_list, val_acc_list, test_acc_list = [], [], []
-        pred_test_list = []
+        train_acc_list, val_acc_list,  = [], []
+        test_acc_list, test_pred_list = [], []
 
-        # Minibatch Stochastic Descent
-        for iteration in range(epochs):
+        # Stochastic Descent
+        for itr in range(epochs):
 
+            # Minibatch weight updation
             mb_pos = 0
             for i in range(X.shape[0]//mb_size):
                 mb_next = mb_pos+mb_size
 
-                # Get Gradient
-                out_probs = self._softmax(
-                    X[mb_pos:mb_next], weight)
+                # Probability matrix for the given batch
+                y = self._softmax(X[mb_pos:mb_next], weight)
 
-                grad = (1.0/mb_size) * np.dot(X[mb_pos:mb_next].T,
-                                              (out_probs - y[mb_pos:mb_next]))
-                g0 = grad[0]
-                grad += ((self.lmbda * weight) / mb_size)
-                grad[0] = g0
+                # Gradient of cross entropy error
+                gradient = np.dot(X[mb_pos:mb_next].T,
+                                  (y - t[mb_pos:mb_next]))/mb_size
 
-                weight -= self.alpha * grad
+                # Regularization, avoid regularizing bias term
+                bias_term = gradient[0]
+                gradient += ((self.lmbda / mb_size) * weight)
+                gradient[0] = bias_term
 
-                # calculate the magnitude of the gradient and check for convergence
-                loss = self._get_entropy_loss(
-                    X[mb_pos:mb_next], weight, y)
+                # Weight update with learning rate
+                weight -= self.learning_rate * gradient
 
+                # Cross entropy loss of mini-batch of data
+                loss = self._get_cross_entropy_loss(X[mb_pos:mb_next],
+                                                    weight, t)
+                # Update
                 mb_pos = mb_next
 
-            # Track loss of this iteration
+            # Track cross entropy loss of this iteration
             loss_list.append(loss)
 
             # Training Accuracy
-            pred_train = self._one_hot_encoding(np.dot(X, weight))
+            train_pred = self._one_hot_encoding(np.dot(X, weight))
             train_acc_list.append(
-                self._get_accuracy(self.train_tar, pred_train))
+                self._get_accuracy(self.train_tar, train_pred))
             # Validation Accuracy
-            pred_val = self._one_hot_encoding(
+            val_pred = self._one_hot_encoding(
                 np.dot(self.val_data, weight))
             val_acc_list.append(
-                self._get_accuracy(self.val_tar, pred_val))
+                self._get_accuracy(self.val_tar, val_pred))
 
             # Testing Accuracy
-            pred_test = self._one_hot_encoding(
+            test_pred = self._one_hot_encoding(
                 np.dot(self.test_data, weight))
             test_acc_list.append(
-                self._get_accuracy(self.test_tar, pred_test))
-            pred_test_list.append(pred_test)
+                self._get_accuracy(self.test_tar, test_pred))
+            test_pred_list.append(test_pred)
 
             if verbose:
-                print(f'-------Iteration : {iteration}, LOSS : {loss}---------')
+                print(f'-------Iteration : {itr}, LOSS : {loss}---------')
 
-            # Early Stopping exit
-            if np.abs(loss) < max_error or math.isnan(loss):
+            # Early Stopping
+            if np.abs(loss) < early_stopping_error or math.isnan(loss):
                 break
 
         return(loss_list, train_acc_list, val_acc_list, test_acc_list, pred_test_list)
