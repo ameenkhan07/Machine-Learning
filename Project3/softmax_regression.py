@@ -9,11 +9,10 @@ class SoftmaxRegression:
             args[0]), args[1], args[2]
         self.val_data, self.val_tar, self.val_labels = self._add_bias(
             args[3]), args[4], args[5]
-        self.test_data, self.test_tar, self.test_labels = self._add_bias(
-            args[6]), args[7], args[8]
         self.lmbda = 0.01
         self.learning_rate = 0.01
         self.minibatch_size = 20
+        self.weight = []
 
     def _add_bias(self, data):
         """Adding Bias term to dataset
@@ -25,9 +24,16 @@ class SoftmaxRegression:
         """
         return(np.argmax(t, axis=1))
 
+    def get_pred_data(self, data, weight=[]):
+        """
+        """
+        # Get model weight if none passes in params
+        if not len(weight):
+            weight = self.weight
+            data = self._add_bias(data)
+        return(self._one_hot_encoding(np.dot(data, weight)))
+
     def _get_accuracy(self, y, t):
-        """
-        """
         count = sum([1 for i in range(len(y)) if y[i] == t[i]])
         return(float(count)/len(y))
 
@@ -63,9 +69,7 @@ class SoftmaxRegression:
         # Initialise random weights
         weight = np.random.rand(X.shape[1], len(t[0]))
 
-        loss_list = []
-        train_acc_list, val_acc_list,  = [], []
-        test_acc_list, test_pred_list = [], []
+        loss_list, train_acc_list, val_acc_list,  = [], [], []
 
         # Stochastic Descent
         for itr in range(epochs):
@@ -100,21 +104,13 @@ class SoftmaxRegression:
             loss_list.append(loss)
 
             # Training Accuracy
-            train_pred = self._one_hot_encoding(np.dot(X, weight))
+            train_pred = self.get_pred_data(X, weight)
             train_acc_list.append(
                 self._get_accuracy(self.train_tar, train_pred))
             # Validation Accuracy
-            val_pred = self._one_hot_encoding(
-                np.dot(self.val_data, weight))
+            val_pred = self.get_pred_data(self.val_data, weight)
             val_acc_list.append(
                 self._get_accuracy(self.val_tar, val_pred))
-
-            # Testing Accuracy
-            test_pred = self._one_hot_encoding(
-                np.dot(self.test_data, weight))
-            test_acc_list.append(
-                self._get_accuracy(self.test_tar, test_pred))
-            test_pred_list.append(test_pred)
 
             if verbose:
                 print(f'-------Iteration : {itr}, LOSS : {loss}---------')
@@ -123,4 +119,7 @@ class SoftmaxRegression:
             if np.abs(loss) < early_stopping_error or math.isnan(loss):
                 break
 
-        return(loss_list, train_acc_list, val_acc_list, test_acc_list, pred_test_list)
+        # Save the weights after model has been trained
+        self.weight = weight
+
+        return(loss_list, train_acc_list, val_acc_list)

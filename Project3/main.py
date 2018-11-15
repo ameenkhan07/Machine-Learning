@@ -32,18 +32,18 @@ print('\n----------------------------------------------------\n')
 
 # Implementation of Logistic Regression
 print("\n--------------Softmax Logistic Regression (SGD)-----------------\n")
-sr = SoftmaxRegression(
-    train_data, train_tar, train_labels,
-    validation_data, validation_tar, validation_labels,
-    test_data, test_tar, test_labels)
-loss_list, train_acc_list, val_acc_list, test_acc_list, pred_test_list = sr.get_sgd_solution()
+sr = SoftmaxRegression(train_data, train_tar, train_labels,
+                       validation_data, validation_tar, validation_labels)
+loss_list, train_acc_list, val_acc_list = sr.get_sgd_solution(verbose=0)
+
+# Plot Training and Validation Accuracy
 # print('Training Accuracy : ', train_acc_list[-1])
 # print('Validation Accuracy : ', val_acc_list[-1])
-# print('Testing Accuracy : ', test_acc_list[-1])
-acc = get_confusion_matrix(
-    pred_test_list[-1], test_tar, 'Softmax Logistic Regression')
-print(f'Logistic Regression Accuracy : {acc}')
 
+pred_test = sr.get_pred_data(test_data)
+acc = get_confusion_matrix(
+    pred_test, test_tar, 'Softmax Logistic Regression')
+print(f'Logistic Regression Accuracy : {acc}')
 
 # Append validation dataset to training dataset
 train_data = np.concatenate((train_data, validation_data), axis=0)
