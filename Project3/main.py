@@ -24,9 +24,9 @@ print(
 print(f'Testing Data : {len(test_data)}, Testing LABELS : {test_labels.shape}')
 
 # USPS Test Data
-# USPSMat, USPSTar, USPSLabel = get_USPS_data()
-# print('\nUSPS TEST DATA SUMMARY\n')
-# print(f'USPS Data : {USPSMat.shape}, USPS Label : {USPSTar.shape}')
+USPSMat, USPSTar, USPSLabel = get_USPS_data()
+print('\nUSPS TEST DATA SUMMARY\n')
+print(f'USPS Data : {USPSMat.shape}, USPS Label : {USPSTar.shape}')
 
 print('\n----------------------------------------------------\n')
 
@@ -42,8 +42,13 @@ loss_list, train_acc_list, val_acc_list = sr.get_sgd_solution(verbose=0)
 
 pred_test = sr.get_pred_data(test_data)
 acc = get_confusion_matrix(
-    pred_test, test_tar, 'Softmax Logistic Regression')
-print(f'Logistic Regression Accuracy : {acc}')
+    pred_test, test_tar, 'Softmax Logistic Regression (MNIST)')
+print(f'Logistic Regression Accuracy for MNIST: {acc}')
+
+pred_test_usps = sr.get_pred_data(USPSMat)
+acc_usps = get_confusion_matrix(
+    pred_test_usps, USPSTar, 'Softmax Logistic Regression (USPS)')
+print(f'Logistic Regression Accuracy for USPS : {acc_usps}')
 
 # Append validation dataset to training dataset
 train_data = np.concatenate((train_data, validation_data), axis=0)
@@ -57,12 +62,13 @@ nn = SequentialNeuralNetwork(train_data, train_tar, train_labels)
 model = nn.get_model()
 nn.run_model(model)
 pred_test = nn.get_predicted_data(model, test_data)
-acc = get_confusion_matrix(pred_test, test_tar, 'Neural Network')
-print(f'Neural Network Accuracy : {acc}')
+acc = get_confusion_matrix(pred_test, test_tar, 'Neural Network (MNIST)')
+print(f'Neural Network Accuracy for MNIST: {acc}')
 
 # Testing on USPS data
-# usps_loss, usps_accuracy = nn.test_model(model, USPSMat, USPSLabel)
-# print(f'USPS Accuracy : {usps_accuracy*100}')
+pred_test_usps = nn.get_predicted_data(model, USPSMat)
+acc = get_confusion_matrix(pred_test_usps, USPSTar, 'Neural Network (USPS)')
+print(f'Neural Network Accuracy for USPS: {acc}')
 
 print("\n----------------------Random Forest------------------------\n")
 
@@ -70,8 +76,13 @@ print("\n----------------------Random Forest------------------------\n")
 rf = RandomForest(train_data, train_tar, train_labels)
 classifier = rf.get_rf_classifier()
 pred_test = rf.get_pred_data(classifier, test_data)
-acc = get_confusion_matrix(pred_test, test_tar, 'Random Forest')
-print(f'Random Forest Accuracy : {acc}')
+acc = get_confusion_matrix(pred_test, test_tar, 'Random Forest (MNIST)')
+print(f'Random Forest Accuracy for MNIST: {acc}')
+
+# Testing on USPS data
+pred_test_usps = rf.get_pred_data(classifier, USPSMat)
+acc = get_confusion_matrix(pred_test_usps, USPSTar, 'Random Forest (USPS)')
+print(f'Random Forest Accuracy for USPS: {acc}')
 
 print("\n------------------Support Vector Machine---------------------\n")
 
@@ -79,5 +90,12 @@ print("\n------------------Support Vector Machine---------------------\n")
 svc = SupportVectorClassifier(train_data, train_tar, train_labels)
 classifier = svc.get_svc()
 pred_test = svc.get_pred_data(classifier, test_data)
-acc = get_confusion_matrix(pred_test, test_tar, 'Support Vector Machine')
-print(f'Support Vector Maching Accuracy : {acc}')
+acc = get_confusion_matrix(
+    pred_test, test_tar, 'Support Vector Machine (MNIST)')
+print(f'Support Vector Maching Accuracy for MNIST: {acc}')
+
+# Testing on USPS data
+pred_test_usps = svc.get_pred_data(classifier, USPSMat)
+acc = get_confusion_matrix(pred_test_usps, USPSTar,
+                           'Support Vector Machine (USPS)')
+print(f'Support Vector Maching Accuracy for USPS: {acc}')
