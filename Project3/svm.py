@@ -8,7 +8,7 @@ class SupportVectorClassifier():
     def get_svc(self):
         """
         """
-        classifier = SVC(kernel='rbf', random_state=0)
+        classifier = SVC(kernel='linear', random_state=0)
         classifier.fit(self.train_data, self.train_tar)
         return classifier
 
