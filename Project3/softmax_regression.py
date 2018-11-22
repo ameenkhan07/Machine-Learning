@@ -71,7 +71,7 @@ class SoftmaxRegression:
 
         loss_list, train_acc_list, val_acc_list,  = [], [], []
 
-        # Stochastic Descent
+        # Gradient Descent
         for itr in range(epochs):
 
             # Minibatch weight updation

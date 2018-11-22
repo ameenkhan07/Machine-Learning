@@ -9,7 +9,7 @@ class RandomForest():
         """
         """
         classifier = RandomForestClassifier(
-            n_estimators=20, criterion='entropy', random_state=0)
+            n_estimators=100, criterion='entropy', random_state=0)
         classifier.fit(self.train_data, self.train_tar)
         return classifier
 
